@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+    <div id="error-message" class="alert alert-danger">
+        {{ message }}
+    </div>
+{% endfor %}
+{% endif %}
+<div class="jumbotron" style="border-radius: 20px; background-color: #E2E8EF">
+    <form method="post" action="{% url 'berita' %}" class="mb-4" id="beritaForm">
+        {% csrf_token %}
+        
+        {% block messages %}
+        {% if error_message %}
+            <div id="error-message" class="alert alert-danger">
+                {{ error_message }}
+            </div>
+        {% endif %}
+        {% endblock %}  
+        <div class="form-group">
+            <label for="{{ form.link.id_for_label }}"><h4><strong>Masukkan Link Berita</strong></h4></label>
+            <div class="input-group">
+                {{ form.link }}
+                <div class="input-group-append" style="margin-left: 2em;">
+                    <button type="submit" class="btn" id="submitBtn" style="background-color: #005EA2; color: #fff; border-radius: 20px;">
+                        <span id="button-text">Scrape Berita</span>
+                        <span id="loading-spinner" style="display: none;">Sedang mengekstrak data...</span>
+                        <div id="loading-spinner" class="spinner-border" role="status" style="display: none;">
+                            <span id="loading-spinner" class="sr-only" style="display: none;">Sedang mengekstrak data...</span>
+                        </div>
+                    </button>
+                </div>                
+            </div>
+        </div>
+        <div class="">
+            <p>This scraping functionality is limited to news sources such as Kompas.com, Detik.com, and CNNIndonesia.com.</p>
+        </div>
+    </form>
+</div>
+<h4><strong>List Berita</strong></h4>
+<div class="row">
+    <div class="col-6">
+        <p style="opacity: 0.75;"><strong>Lima berita terbaru di-scrape</strong></p>
+    </div>
+
+    <div class="col-6 text-right">
+        <h6><a href="{% url 'list_berita' %}" style="color: #005EA2;"><strong>Lihat Lebih Banyak Berita</strong></a></h6>
+    </div>
+</div>
+<table class="table table-striped" style="table-layout: fixed; width: 100%;">
+    <thead class="text-center">
+        <tr>
+            <th>Judul</th>
+            <th>Portal</th>
+            <th>Konten</th>
+            <th>Jumlah Komentar</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for berita in berita_list %}
+            <tr>
+                <td style="width: 20%; text-wrap: wrap;"><a href="{{berita.link}}" class="text-decoration-none" target="_blank">{{ berita.judul }}</a></td>
+                <td class="text-center" style="width: 15%;">{{ berita.portal }}</td>
+                <td style="width: 35%;">{{ berita.konten|truncatechars:100 }}</td>
+                <td class="text-center" style="width: 10%;">{{ berita.jumlah_komentar }}</td>
+                <td class="text-center" style="width: 5%;">
+                    {% if berita.status_prediksi %}
+                        <span class="badge badge-pill badge-success">Sudah dilakukan Prediksi</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-secondary">Belum dilakukan Prediksi</span>
+                    {% endif %}
+                </td>
+                <td class="text-center" style="width: 5%;">
+                    <!-- Add your action links or buttons here -->
+                    <a href="{% url 'detail_berita' berita_id=berita.id %}" class="btn btn-sm btn-primary" style="background-color: #005EA2; color: #fff; border-radius: 20px;">Detail Berita</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>    
+</table>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var errorMessage = document.getElementById('error-message');
+    
+            if (errorMessage) {
+                setTimeout(function () {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var form = document.getElementById('beritaForm');
+            var predictButton = document.getElementById('submitBtn');
+            var buttonText = document.getElementById('button-text');
+            var loadingSpinner = document.getElementById('loading-spinner');
+        
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+        
+                // Show loading effect
+                showLoading();
+        
+                // Submit form manually after loading effect is displayed
+                setTimeout(function () {
+                    form.submit();
+                }, 1000);  // After 1 second (adjust as needed)
+            });
+        
+            function showLoading() {
+                // Hide button text and show loading spinner
+                buttonText.style.display = 'none';
+                loadingSpinner.style.display = 'inline-block';
+                predictButton.disabled = true;  // Disable the button during the loading process
+            }
+            
+        //     // Check if the prediction process has completed (stop_prediction set by the view)
+        //     if ('{{ request.stop_prediction }}') {
+        //     showLoading();
+        // }
+
+        if ('{% if stop_prediction %}'){
+            showLoading();}
+        '{% endif %}'
+        });
+        </script>
+{% endblock %}

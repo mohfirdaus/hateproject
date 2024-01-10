@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail Berita - {{ hasil_scrape.judul }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if hasil_scrape %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">{{ hasil_scrape.judul }}</h2>
+            <p class="card-text text-justify">{{ hasil_scrape.konten }}</p>
+            <p class="card-text"><small class="text-muted">Sumber: <a href="{{hasil_scrape.link}}" target="_blank">{{ hasil_scrape.portal }}</a></small></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 d-flex">
+            <div class="row">
+                <h3 class="mb-4">Komentar: </h3>
+                <h5 style="opacity: 75%; margin-top: 0.29em;"><strong>({{ hasil_scrape.jumlah_komentar }} Komentar)</strong></h5>
+            </div>
+        </div>
+    
+        {% if filtered_komentar|length == komentar|length %}
+            <div class="col-md-6 d-flex justify-content-end">
+                <form id="predict-form" method="post" action="{% url 'predict_comments' berita_id=hasil_scrape.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button id="predict-button" type="submit" class="btn mx-2" style="border-radius: 20px; background-color: #005EA2; color: white;">
+                        <span id="button-text"><strong>Prediksi Komentar</strong></span>
+                        <span id="loading-spinner" style="display: none;">Sedang menganalisis komentar...</span>
+                    </button>
+                </form>
+            </div>
+        {% else %}
+        <div class="col-md-6 d-flex justify-content-end">
+            <div class="row">
+                <div style="width: 100px; height: 35px; border-radius: 20px; border: 3px solid #dc3545; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #dc3545; margin-right: 1em;">
+                    Hate: {{ hate_count }}
+                </div>
+                <div style="width: 120px; height: 35px; border-radius: 20px; border: 3px solid #007bff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #007bff;">
+                    Non-hate: {{ non_hate_count }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>    
+    <table class="table table-bordered">
+        <thead class="text-center">
+            <tr>
+                <th>Username</th>
+                <th>Komentar</th>
+                <th>Prediksi</th>
+                <th>Probabilitas</th>
+                <!-- <th>Edit</th> -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for komentar_instance in komentar %}
+                <tr class=" align-items-center">
+                    <td><strong>{{ komentar_instance.penulis_komentar }}</strong></td>
+                    <td>{{ komentar_instance.isi_komentar }}</td>
+                    <td class="text-center">
+                        {% if komentar_instance.prediksi == 'Hate' %}
+                            <span class="badge badge-danger">{{ komentar_instance.prediksi }}</span>
+                        {% elif komentar_instance.prediksi == 'Non-Hate' %}
+                            <span class="badge badge-primary">{{ komentar_instance.prediksi }}</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Belum diprediksi</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ komentar_instance.formatted_probabilitas }}</td>
+                    <!-- <td>
+                        <button class="btn btn-primary edit-button" data-komentar-id="{{ komentar_instance.id }}" data-toggle="modal" data-target="#editModal">Edit</button>
+                    </td> -->
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Modal for editing comments -->
+<!-- <div class="modal" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Prediction</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm" method="post" action="{% url 'detail_berita' berita_id=hasil_scrape.id %}">
+            {% csrf_token %}
+            {{ edit_request_form.as_p }}
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div> -->
+    <!-- Pagination -->
+    <div class="pagination mt-4 d-flex justify-content-center">
+        <ul class="pagination justify-content-center">
+            {% if komentar.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ komentar.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Halaman {{ komentar.number }} dari {{ komentar.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if komentar.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ komentar.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ komentar.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% else %}
+        <div class="alert alert-danger">
+            Gagal mendapatkan data berita.
+        </div>
+    {% endif %}
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('predict-form');
+    var predictButton = document.getElementById('predict-button');
+    var buttonText = document.getElementById('button-text');
+    var loadingSpinner = document.getElementById('loading-spinner');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Show loading effect
+        showLoading();
+
+        // Submit form manually after loading effect is displayed
+        setTimeout(function () {
+            form.submit();
+        }, 1000);  // After 1 second (adjust as needed)
+    });
+
+    function showLoading() {
+        // Hide button text and show loading spinner
+        buttonText.style.display = 'none';
+        loadingSpinner.style.display = 'inline-block';
+        predictButton.disabled = true;  // Disable the button during the loading process
+    }
+    
+    // Check if the prediction process has completed (stop_prediction set by the view)
+    if ('{{ request.stop_prediction }}') {
+    showLoading();
+}
+});
+</script>
+{% endblock %}

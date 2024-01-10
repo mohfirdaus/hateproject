@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}List Berita{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-6">
+        <h4><strong>List Berita</strong></h4>
+        <p style="opacity: 0.75;"><strong>Semua daftar berita yang sudah di-scrape</strong></p>
+    </div>
+
+    <div class="col-6 text-left">
+        <form method="get" action="{% url 'list_berita' %}">
+            <div class="form-group">
+                <div class="input-group mb-3">
+                    <input style="border-radius: 20px;" type="text" class="form-control" placeholder="Cari berita..." name="search" value="{{ request.GET.search }}" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+                    <div class="input-group-append">
+                        <button class="btn" type="submit" style="background-color: #005EA2; color: #fff; border-radius: 20px; margin-left: 2em;">Pencarian</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<table class="table table-striped" style="table-layout: fixed; width: 100%;">
+    <thead class="text-center">
+        <tr>
+            <th>Judul</th>
+            <th>Portal</th>
+            <th>Konten</th>
+            <th>Jumlah Komentar</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for berita in berita_list %}
+            <tr>
+                <td style="width: 20%; text-wrap: wrap;"><a href="{{berita.link}}" class="text-decoration-none" target="_blank">{{ berita.judul }}</a></td>
+                <td class="text-center" style="width: 15%;">{{ berita.portal }}</td>
+                <td style="width: 35%;">{{ berita.konten|truncatechars:100 }}</td>
+                <td class="text-center" style="width: 10%;">{{ berita.jumlah_komentar }}</td>
+                <td class="text-center" style="width: 5%;">
+                    {% if berita.status_prediksi %}
+                        <span class="badge badge-pill badge-success">Sudah dilakukan Prediksi</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-secondary">Belum dilakukan Prediksi</span>
+                    {% endif %}
+                </td>
+                <td class="text-center" style="width: 5%;">
+                    {% if user.is_staff %}
+                    <div class="row">
+                        <a href="{% url 'detail_berita' berita_id=berita.id %}" class="btn btn-sm" style="background-color: #005EA2; color: #fff; border-radius: 20px; margin-right: 1em;">Detail Berita</a>
+                        <!-- Add delete button for the news article -->
+                        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteModal{{ berita.id }}" style="border-radius: 20px;">
+                            Hapus
+                        </button>
+                    </div>
+                {% else %}
+                        <a href="{% url 'detail_berita' berita_id=berita.id %}" class="btn btn-sm" style="background-color: #005EA2; color: #fff; border-radius: 20px; margin-right: 1em;">Detail Berita</a>
+                {% endif %}                
+                      <!-- Delete Modal -->
+                      <div class="modal fade" id="deleteModal{{ berita.id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="deleteModalLabel">Hapus Data Berita</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              Apakah anda yakin ingin menghapus berita: "{{ berita.judul }}"?
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 20px;">Batal</button>
+                              <form method="post" action="{% url 'delete_berita' berita.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" style="border-radius: 20px;">Hapus!</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>    
+</table>
+    <!-- Pagination -->
+    <div class="pagination mt-4 d-flex justify-content-center">
+        <ul class="pagination justify-content-center">
+            {% if berita.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ berita.previous_page_number }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <span class="page-link">
+                    Halaman {{ berita.number }} dari {{ berita.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if berita.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ berita.next_page_number }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ berita.paginator.num_pages }}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+{% endblock %}
