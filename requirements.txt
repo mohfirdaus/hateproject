@@ -42,7 +42,7 @@ exceptiongroup==1.1.3
 ez-setup==0.9
 fake-useragent==1.3.0
 Faker==19.11.0
-feedparser==5.2.1
+feedparser==latest_version
 filelock==3.12.4
 flatbuffers==23.5.26
 fonttools==4.44.0
