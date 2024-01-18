@@ -4,4 +4,4 @@ from .models import *
 # Register your models here.
 admin.site.register(Berita)
 admin.site.register(Komentar)
-# admin.site.register(EditRequest)
+admin.site.register(EditPrediksi)

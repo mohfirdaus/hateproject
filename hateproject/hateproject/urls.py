@@ -29,6 +29,8 @@ urlpatterns = [
     path('delete_berita/<int:berita_id>/', views.delete_berita, name='delete_berita'),
     path('login/', views.login_view, name="login"),
     path('logout/', views.logout_view, name='logout'),
-    # path('edit_request/<int:komentar_id>/', views.edit_request, name='edit_request')
-
+    path('edit_prediksi/<int:komentar_id>/', views.edit_prediksi, name='edit_prediksi'),
+    path('list_koreksi_label/', views.list_edit_requests, name='list_koreksi_label'),
+    path('admin_update_status/<int:edit_request_id>/', views.admin_update_status, name='admin_update_status'),
+    path('history_koreksi_label/', views.history_approval, name='history_koreksi_label'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

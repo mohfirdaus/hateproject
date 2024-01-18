@@ -3,7 +3,7 @@ from .forms import LinkBeritaForm, BeritaSearchForm
 from .scraper_kompas import scraper_kompas
 from .scraper_detik import scraper_detik
 from .scraper_cnn import scraper_cnn
-from .models import Berita, Komentar
+from .models import Berita, Komentar, EditPrediksi
 import logging
 from urllib.parse import urlparse, urlunparse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -131,17 +131,6 @@ def detail_berita(request, berita_id,):
     
     filtered_komentar = [k for k in komentar if k.prediksi is None]
 
-    # if request.method == 'POST':
-    #     form = EditRequestForm(request.POST)
-    #     if form.is_valid():
-    #         # Save the form data to EditRequest model
-    #         edit_request = form.save(commit=False)
-    #         edit_request.komentar = Komentar.objects.get(id=form.cleaned_data['komentar_id'])
-    #         edit_request.save()
-    #         return redirect('detail_berita', berita_id=berita_id)  # Redirect to the same page after submission
-    # else:
-    #     form = EditRequestForm()
-
     return render(request, 'detail_berita.html', {'hasil_scrape': hasil_scrape, 'komentar': komentar, 'filtered_komentar': filtered_komentar, 'hate_count':hate_count, 'non_hate_count':non_hate_count})
 
 def list_berita(request):
@@ -211,12 +200,88 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.success(request, 'Anda telah berhasil Logout!')
     return redirect('berita')
 
-# def edit_request(request):
-#     form = EditRequestForm(request.POST or None)
-#     if request.method == 'POST':
-#         if form.is_valid():
-#             form.save()
-#             return redirect('detail_berita', berita_id=form.cleaned_data['komentar'].berita.id)
-#     return render(request, 'edit_request.html', {'form': form})
+def edit_prediksi(request, komentar_id):
+    komentar = get_object_or_404(Komentar, id=komentar_id)
+
+    if request.method == 'POST':
+        nama = request.POST.get('nama')
+        email = request.POST.get('email')
+        prediksi_saat_ini = komentar.prediksi
+        prediksi_seharusnya = komentar.prediksi_seharusnya
+        alasan = request.POST.get('alasan')
+
+        # Simpan data tambahan ke dalam database
+        komentar.edit_prediksi.create(
+            nama=nama,
+            email=email,
+            prediksi_saat_ini=prediksi_saat_ini,
+            prediksi_seharusnya=prediksi_seharusnya,
+            alasan=alasan
+        )
+
+        messages.success(request, 'Label prediksi berhasil disubmit! akan ditinjau oleh Admin')
+
+        return redirect('detail_berita', berita_id=komentar.berita.id)
+
+    return redirect('detail_berita', berita_id=komentar.berita.id)
+
+def list_edit_requests(request):
+    edit_requests = EditPrediksi.objects.filter(sudahditinjau=False).order_by('-id')
+
+    data = []
+
+    for edit_request in edit_requests:
+        komentar_info = {
+            'judul_berita': edit_request.komentar.berita.judul,
+            'isi_komentar': edit_request.komentar.isi_komentar,
+        }
+
+        edit_request_data = {
+            'id': edit_request.id,
+            'nama': edit_request.nama,
+            'email': edit_request.email,
+            'prediksi_saat_ini': edit_request.prediksi_saat_ini,
+            'prediksi_seharusnya': edit_request.prediksi_seharusnya,
+            'alasan': edit_request.alasan,
+            'komentar_info': komentar_info,
+        }
+
+        data.append(edit_request_data)
+
+    return render(request, 'list_edit_requests.html', {'edit_requests': data})
+
+def admin_update_status(request, edit_request_id):
+    edit_request = get_object_or_404(EditPrediksi, id=edit_request_id)
+
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        remarks = request.POST.get('remarks')
+
+        if status == 'approved':
+            # Update prediksi komentar dari EditPrediksi
+            edit_request.komentar.prediksi = edit_request.prediksi_seharusnya
+            edit_request.komentar.probabilitas = None  
+            edit_request.statusadmin = 'Diterima'
+            edit_request.komentar.save()
+
+            # messages.success(request, 'Prediksi berhasil disetujui.')
+        elif status == 'rejected':
+            edit_request.statusadmin = 'Ditolak!'
+            # messages.warning(request, 'Prediksi ditolak.')
+
+        # Tambahkan catatan (remarks) ke EditPrediksi
+        edit_request.remarks = remarks
+        edit_request.sudahditinjau = True
+        edit_request.save()
+
+        return redirect('list_koreksi_prediksi')
+
+    return redirect('list_koreksi_prediksi')
+
+def history_approval(request):
+    edit_requests = EditPrediksi.objects.filter(sudahditinjau=True).order_by('-id')
+
+    return render(request, 'history_approval.html', {'edit_requests': edit_requests})

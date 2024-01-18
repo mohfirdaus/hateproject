@@ -4,6 +4,13 @@
 
 {% block content %}
 <div class="container mt-4">
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-info" role="alert" style="margin-top: 3em;">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% endif %}
     {% if hasil_scrape %}
     <div class="card mb-4">
         <div class="card-body">
@@ -50,51 +57,83 @@
                 <th>Komentar</th>
                 <th>Prediksi</th>
                 <th>Probabilitas</th>
-                <!-- <th>Edit</th> -->
+                <th>Action</th>
             </tr>
         </thead>
-        <tbody>
-            {% for komentar_instance in komentar %}
-                <tr class=" align-items-center">
-                    <td><strong>{{ komentar_instance.penulis_komentar }}</strong></td>
-                    <td>{{ komentar_instance.isi_komentar }}</td>
-                    <td class="text-center">
-                        {% if komentar_instance.prediksi == 'Hate' %}
-                            <span class="badge badge-danger">{{ komentar_instance.prediksi }}</span>
-                        {% elif komentar_instance.prediksi == 'Non-Hate' %}
-                            <span class="badge badge-primary">{{ komentar_instance.prediksi }}</span>
-                        {% else %}
-                            <span class="badge badge-secondary">Belum diprediksi</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-center">{{ komentar_instance.formatted_probabilitas }}</td>
-                    <!-- <td>
-                        <button class="btn btn-primary edit-button" data-komentar-id="{{ komentar_instance.id }}" data-toggle="modal" data-target="#editModal">Edit</button>
-                    </td> -->
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <!-- Modal for editing comments -->
-<!-- <div class="modal" id="editModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Edit Prediction</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form id="editForm" method="post" action="{% url 'detail_berita' berita_id=hasil_scrape.id %}">
-            {% csrf_token %}
-            {{ edit_request_form.as_p }}
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div> -->
+    <tbody>
+        {% for komentar_instance in komentar %}
+            <tr class="align-items-center">
+                <td><strong>{{ komentar_instance.penulis_komentar }}</strong></td>
+                <td>{{ komentar_instance.isi_komentar }}</td>
+                <td class="text-center">
+                    {% if komentar_instance.prediksi == 'Hate' %}
+                        <span class="badge badge-danger">{{ komentar_instance.prediksi }}</span>
+                    {% elif komentar_instance.prediksi == 'Non-Hate' %}
+                        <span class="badge badge-primary">{{ komentar_instance.prediksi }}</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Belum diprediksi</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ komentar_instance.formatted_probabilitas }}</td>
+                {% if komentar_instance.prediksi != None %}
+                <td class="text-center">
+                    {% if komentar_instance.prediksi and not komentar_instance.edit_prediksi.exists %}
+                        <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#editPrediksiModal{{ komentar_instance.id }}">
+                            Koreksi Label
+                        </button>
+                    {% elif komentar_instance.edit_prediksi.exists and komentar_instance.edit_prediksi.last.sudahditinjau %}
+                        <p>Sudah pernah dikoreksi label</p>
+                    {% else %}
+                        <p>Koreksi Label Sedang Tinjau Admin</p>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+
+            {% if komentar_instance.prediksi %}
+                <!-- Modal -->
+                <div class="modal fade" id="editPrediksiModal{{ komentar_instance.id }}" tabindex="-1" role="dialog" aria-labelledby="editPrediksiModalLabel{{ komentar_instance.id }}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editPrediksiModalLabel{{ komentar_instance.id }}">Koreksi Label</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'edit_prediksi' komentar_instance.id %}">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="nama">Nama:</label>
+                                        <input type="text" name="nama" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email:</label>
+                                        <input type="email" name="email" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prediksi_saat_ini">Label Prediksi:</label>
+                                        <input type="text" name="prediksi_saat_ini" class="form-control" value="{{ komentar_instance.prediksi }}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prediksi_seharusnya">Label Seharusnya:</label>
+                                        <input type="text" name="prediksi_seharusnya" class="form-control" value="{{ komentar_instance.prediksi_seharusnya }}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="alasan">Alasan:</label>
+                                        <textarea name="alasan" class="form-control" rows="4" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Simpan</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
     <!-- Pagination -->
     <div class="pagination mt-4 d-flex justify-content-center">
         <ul class="pagination justify-content-center">

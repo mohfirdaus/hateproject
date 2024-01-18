@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Koreksi Label yang Diajukan{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-6">
+            <h4><strong>Daftar Koreksi Label</strong></h4>
+            <p style="opacity: 0.75;"><strong>Semua daftar koreksi label yang diajukan</strong></p>
+        </div>
+
+        <div class="col-6 text-left">
+            <!-- Tambahkan form pencarian jika diperlukan -->
+        </div>
+    </div>
+
+    <table class="table table-bordered mt-3">
+        <thead class="text-center">
+            <tr>
+                <th>Nama</th>
+                <th>Email</th>
+                <th>Label Prediksi</th>
+                <th>Label Seharusnya</th>
+                <th>Alasan</th>
+                <th>Judul Berita</th>
+                <th>Isi Komentar</th>
+                {% if user.is_staff %}
+                <th>Action</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for request in edit_requests %}
+                <tr>
+                    <td>{{ request.nama }}</td>
+                    <td>{{ request.email }}</td>
+                    <td>{{ request.prediksi_saat_ini }}</td>
+                    <td>{{ request.prediksi_seharusnya }}</td>
+                    <td>{{ request.alasan }}</td>
+                    <td>{{ request.komentar_info.judul_berita }}</td>
+                    <td>{{ request.komentar_info.isi_komentar|truncatechars:100 }}</td>
+                    {% if user.is_staff %}
+                    <td class="text-center">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ request.id }}">
+                            Edit
+                        </button>
+                    </td>
+                    {% endif %}
+                </tr>
+
+                <!-- Modal -->
+                    <div class="modal fade" id="editModal{{ request.id }}" tabindex="-1" role="dialog" aria-labelledby="editModalLabel{{ request.id }}" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editModalLabel{{ request.id }}">Edit Status</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" action="{% url 'admin_update_status' request.id %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label for="status">Status:</label>
+                                            <select name="status" class="form-control" required>
+                                                <option value="approved">Approve</option>
+                                                <option value="rejected">Reject</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="remarks">Remarks:</label>
+                                            <textarea name="remarks" class="form-control" rows="4" required></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

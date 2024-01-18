@@ -1,5 +1,0 @@
-<form method="post" action="{% url 'edit_request' komentar_id=editkomentar.id %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
