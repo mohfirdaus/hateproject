@@ -18,7 +18,7 @@ class Berita(models.Model):
         return self.judul
 
 class Komentar(models.Model):
-    berita = models.ForeignKey(Berita, on_delete=models.CASCADE)
+    berita = models.ForeignKey(Berita, on_delete=models.CASCADE, related_name='komentar_set')
     penulis_komentar = models.CharField(max_length=255)
     isi_komentar = models.TextField()
     prediksi = models.CharField(max_length=10, blank=True, null=True)
@@ -38,27 +38,3 @@ class Komentar(models.Model):
             return "{:.4%}".format(self.probabilitas)
         else:
             return "N/A"
-    
-    def lawan_prediksi_saat_ini(self):
-        return 'Non-Hate' if self.prediksi == 'Hate' else 'Hate'
-        
-# class EditRequest(models.Model):
-#     komentar = models.ForeignKey(Komentar, on_delete=models.CASCADE)
-#     nama = models.CharField(max_length=255)
-#     email = models.EmailField()
-#     prediksi_seharusnya = models.CharField(max_length=10)
-#     alasan = models.TextField()
-#     disetujui = models.BooleanField(default=False)
-#     waktu = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f'Edit Request oleh {self.nama} pada {self.waktu}'
-
-#     def save(self, *args, **kwargs):
-#         # Isi otomatis prediksi_seharusnya dengan lawan dari prediksi saat ini
-#         if self.komentar.prediksi == 'Hate':
-#             self.prediksi_seharusnya = 'Non-Hate'
-#         elif self.komentar.prediksi == 'Non-Hate':
-#             self.prediksi_seharusnya = 'Hate'
-        
-#         super().save(*args, **kwargs)
