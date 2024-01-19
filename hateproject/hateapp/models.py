@@ -11,7 +11,6 @@ class Berita(models.Model):
 
     @property
     def status_prediksi(self):
-        # Mengembalikan True jika semua komentar pada berita ini memiliki prediksi
         return all(komentar.prediksi is not None for komentar in self.komentar_set.all())
     
     def __str__(self):

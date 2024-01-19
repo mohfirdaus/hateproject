@@ -277,11 +277,22 @@ def admin_update_status(request, edit_request_id):
         edit_request.sudahditinjau = True
         edit_request.save()
 
-        return redirect('list_koreksi_prediksi')
+        return redirect('list_koreksi_label')
 
-    return redirect('list_koreksi_prediksi')
+    return redirect('list_koreksi_label')
 
 def history_approval(request):
-    edit_requests = EditPrediksi.objects.filter(sudahditinjau=True).order_by('-id')
+    edit_requests = EditPrediksi.objects.filter(sudahditinjau=True).order_by('-id').select_related('komentar')
+
+    # Menambahkan pagination
+    paginator = Paginator(edit_requests, 10) 
+    page = request.GET.get('page')
+
+    try:
+        edit_requests = paginator.page(page)
+    except PageNotAnInteger:
+        edit_requests = paginator.page(1)
+    except EmptyPage:
+        edit_requests = paginator.page(paginator.num_pages)
 
     return render(request, 'history_approval.html', {'edit_requests': edit_requests})
