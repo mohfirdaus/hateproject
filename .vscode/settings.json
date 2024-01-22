@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/49b61284-fc1f-4353-8d4e-a2014b9b9db7/resourceGroups/FinalProject/providers/Microsoft.Web/sites/bijaka",
-    "appService.deploySubpath": "."
-}
