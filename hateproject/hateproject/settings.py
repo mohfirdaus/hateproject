@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-h2!3vc8z&-m0$4egze^2d4(_$8!(a^#q+i@=j@6y3ynn0b7_8g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bijaka.azurewebsites.net','localhost']
+ALLOWED_HOSTS = ['bijaka.azurewebsites.net','localhost','.now.sh','.vercel.app']
 
 
 # Application definition
@@ -126,9 +126,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
+STATICFILES_DIRS = os.path.join(BASE_DIR,'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

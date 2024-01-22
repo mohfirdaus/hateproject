@@ -3,6 +3,7 @@ from .forms import LinkBeritaForm, BeritaSearchForm
 from .scraper_kompas import scraper_kompas
 from .scraper_detik import scraper_detik
 from .scraper_cnn import scraper_cnn
+from .fetchdatagsheet import fetch_and_update_data
 from .models import Berita, Komentar, EditPrediksi
 import logging
 from urllib.parse import urlparse, urlunparse
@@ -12,6 +13,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse
 
 
 logger = logging.getLogger(__name__)
@@ -296,3 +298,7 @@ def history_approval(request):
         edit_requests = paginator.page(paginator.num_pages)
 
     return render(request, 'history_approval.html', {'edit_requests': edit_requests})
+
+def update_google_sheets_view(request):
+    fetch_and_update_data()
+    return HttpResponse('Data successfully updated to Google Sheets')

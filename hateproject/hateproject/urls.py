@@ -33,4 +33,5 @@ urlpatterns = [
     path('list_koreksi_label/', views.list_edit_requests, name='list_koreksi_label'),
     path('admin_update_status/<int:edit_request_id>/', views.admin_update_status, name='admin_update_status'),
     path('history_koreksi_label/', views.history_approval, name='history_koreksi_label'),
+    path('update-google-sheets/', views.update_google_sheets_view, name='update_google_sheets')
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
