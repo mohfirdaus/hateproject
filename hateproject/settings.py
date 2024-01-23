@@ -27,8 +27,8 @@ SECRET_KEY = 'django-insecure-h2!3vc8z&-m0$4egze^2d4(_$8!(a^#q+i@=j@6y3ynn0b7_8g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['bijaka.azurewebsites.net','localhost','.now.sh','.vercel.app']
-
+ALLOWED_HOSTS = ['20.163.237.39','localhost']
+DATA_UPLOAD_MAX_HEADER_SIZE = 1024 * 1024 * 1000 * 5  # 2 GB in bytes
 
 # Application definition
 
