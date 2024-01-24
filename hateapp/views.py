@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 
 
 logger = logging.getLogger(__name__)
@@ -167,8 +167,21 @@ def predict_comments(request, berita_id):
     model_path = "model"
     tokenizer_path = "tokenizer"
 
-    prediction(request, berita_id, model_path, tokenizer_path)
+    predictions = prediction(request, berita_id, model_path, tokenizer_path)
 
+    # Function to stream predictions
+    def stream_predictions(predictions):
+        for comment_prediction in predictions:
+            # Convert prediction to bytes (adjust as per your requirement)
+            prediction_bytes = str(comment_prediction).encode('utf-8')
+            yield prediction_bytes
+
+    # Create a StreamingHttpResponse with the streaming iterator
+    response = StreamingHttpResponse(stream_predictions(predictions), content_type='application/octet-stream')
+
+    # Optionally, you can set additional response headers or modify the response here
+
+    # Redirect to the detail view after streaming the predictions
     return redirect('detail_berita', berita_id=berita_id)
 
 def delete_berita(request, berita_id):

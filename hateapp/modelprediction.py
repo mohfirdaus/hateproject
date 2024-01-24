@@ -1,5 +1,5 @@
 import re
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 from django.shortcuts import render
 from .models import Komentar
@@ -54,8 +54,8 @@ def prediction(request, berita_id, model_path, tokenizer_path):
     komentar_list = Komentar.objects.filter(berita__id=berita_id)
 
     # Load the tokenizer and model from local paths
-    tokenizer = AutoTokenizer.from_pretrained(Path(tokenizer_path))
-    model = AutoModelForSequenceClassification.from_pretrained(Path(model_path))
+    tokenizer = BertTokenizer.from_pretrained(Path(tokenizer_path))
+    model = BertForSequenceClassification.from_pretrained(Path(model_path))
 
     for komentar in komentar_list:
         # Preprocess the comment text
