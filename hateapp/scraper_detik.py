@@ -68,9 +68,14 @@ def scraper_detik(link_berita):
                 # refresh iframe
                 driver.switch_to.default_content()
                 driver.switch_to.frame(iframe)
+                print("masih ada button")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
                 # tombol "more" sudah tidak ada atau sudah berada dikomen paling bawah
+                break
+
+            if not driver.find_elements_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline'):
+                print("udah gada")
                 break
 
         # Parsing HTML dengan BeautifulSoup
