@@ -32,22 +32,18 @@ def scraper_detik(link_berita):
 
         # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
         iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
-        # Ambil HTML dari elemen iframe
-        iframe_html = iframe.get_attribute('innerHTML')
-
-        # Parse HTML menggunakan BeautifulSoup
-        soup = BeautifulSoup(iframe_html, 'html.parser')
-        print(soup)
-
+        # print(iframe)
         driver.switch_to.frame(iframe)
 
         # variabel untuk menyimpan komentar
         all_comments = []
 
+        html = driver.page_source
+        print(html)
+
         while True:
             try:
                 print("masuk while True")
-                # tunggu hingga tombol "more" dapat diklik dan juga untuk menghindari error
                 wait = WebDriverWait(driver, 10) #
                 more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
 
@@ -59,7 +55,7 @@ def scraper_detik(link_berita):
                 
                 # komentar yg muncul di-assign ke variabel all_comments 
                 all_comments.extend(comments)
-                print(all_comments)
+                # print(all_comments)
 
                 # refresh iframe
                 driver.switch_to.default_content()
