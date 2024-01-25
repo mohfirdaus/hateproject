@@ -50,6 +50,6 @@ tqdm==4.66.1
 transformers==4.35.2
 typing_extensions==4.9.0
 tzdata==2023.4
-urllib3==2.1.0
+urllib3==1.26.18
 webdriver-manager==4.0.1
 helium==3.2.6    
