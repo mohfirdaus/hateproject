@@ -47,8 +47,6 @@ def scraper_detik(link_berita):
         while True:
             try:
                 print("masuk while True")
-                # Parsing HTML dengan BeautifulSoup
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
                 # tunggu hingga tombol "more" dapat diklik dan juga untuk menghindari error
                 wait = WebDriverWait(driver, 10) #
                 more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
