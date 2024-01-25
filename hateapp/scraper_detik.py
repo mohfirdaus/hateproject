@@ -38,8 +38,16 @@ def scraper_detik(link_berita):
         # variabel untuk menyimpan komentar
         all_comments = []
 
-        html = driver.page_source
-        print(html)
+        # Find the div element with class "komentar-iframe-min-comment-entry"
+        div_element = driver.find_element_by_css_selector("div.komentar-iframe-min-comment-entry")
+
+        # Get the text content inside the div element
+        text_content = div_element.text
+
+        # Print the text content
+        print("*"*100)
+        print(text_content)
+        print("*"*100)
 
         while True:
             try:
