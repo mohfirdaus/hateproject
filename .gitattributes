@@ -1,1 +1,11 @@
 model/*.safetensors filter=lfs diff=lfs merge=lfs -text
+
+# Ignore SQLite database files
+*.sqlite3
+*.db
+
+# Ignore Django cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
