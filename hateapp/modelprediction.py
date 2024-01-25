@@ -4,7 +4,10 @@ import torch
 from django.shortcuts import render
 from .models import Komentar
 import numpy as np
-from pathlib import Path
+import requests
+
+API_URL = "https://api-inference.huggingface.co/models/sidaus/hatespeech-commentnews-large-ind-2"
+headers = {"Authorization": "Bearer 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"}
 
 # Function to remove emojis from a text
 def remove_emojis(text):
@@ -50,44 +53,46 @@ def cleansing(text):
 
     return text
 
-def prediction(request, berita_id, model_path, tokenizer_path):
-    komentar_list = Komentar.objects.filter(berita__id=berita_id)
+def send_query_with_wait_for_model(payload):
+    return requests.post(API_URL, headers=headers, json={"inputs": payload, "options": {"wait_for_model": True}}).json()
 
-    # Load the tokenizer and model from local paths
-    tokenizer = BertTokenizer.from_pretrained(Path(tokenizer_path))
-    model = BertForSequenceClassification.from_pretrained(Path(model_path))
+def prediction(request, berita_id):
+    komentar_list = Komentar.objects.filter(berita__id=berita_id)
 
     for komentar in komentar_list:
         # Preprocess the comment text
         preprocessed_text = cleansing(komentar.isi_komentar)
+        print(preprocessed_text)
 
-        # Tokenize the comment input
-        inputs = tokenizer(preprocessed_text, return_tensors="pt")
+        # Send the query to the Inference API
+        data = send_query_with_wait_for_model(preprocessed_text)
+        print(data)
 
-        # Make the prediction
-        with torch.no_grad():
-            outputs = model(**inputs)
-            print(outputs)
+        # Assuming the model returns a list of results for each sentence
+        result = data[0][0]  # Assuming the model outputs a single result for each input
+
+        # Print the result (adjust as needed)
+        print(f"Generated Sentence: {preprocessed_text}")
+        print(f"Model Output: {result}")
+        print("-" * 40)
+
+        # Save the prediction & probabilities to the Komentar model
+        # probabilities = torch.nn.functional.softmax(torch.tensor(result["logits"]), dim=-1).cpu().detach().numpy()
+        # probabilities = np.max(probabilities)
+        # predicted_class = torch.argmax(torch.tensor(result["logits"])).item()
+        # class_labels = ["Non-Hate", "Hate"]
+        # predicted_label = class_labels[predicted_class]
         
-        # Menghitung probabilitas menggunakan softmax
-        probabilities = torch.nn.functional.softmax(outputs.logits, dim=-1).cpu().detach().numpy()
-        probabilities = np.max(probabilities)
-        print(probabilities)
+        probabilities = result['score']
+        predicted_label = result['label']
 
-        # Get the predicted class
-        predicted_class = torch.argmax(outputs.logits).item()
+        label_mapping = {'LABEL_0': 'Non-Hate', 'LABEL_1': 'Hate'}
+        predicted_label = label_mapping.get(predicted_label, predicted_label)
 
-        # Define the class labels
-        class_labels = ["Non-Hate", "Hate"]
-
-        # Get the predicted label
-        predicted_label = class_labels[predicted_class]
-
-        # Save the prediction & probabilites to the Komentar model
         komentar.probabilitas = probabilities
         komentar.prediksi = predicted_label
         komentar.save()
-    
+
     # Set 'stop' attribute in the request object
     request.stop_prediction = True
 

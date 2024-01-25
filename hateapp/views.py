@@ -164,10 +164,10 @@ def list_berita(request):
 
 def predict_comments(request, berita_id):
     berita = Berita.objects.get(id=berita_id)
-    model_path = "model"
-    tokenizer_path = "tokenizer"
+    # model_path = "model"
+    # tokenizer_path = "tokenizer"
 
-    predictions = prediction(request, berita_id, model_path, tokenizer_path)
+    predictions = prediction(request, berita_id)
 
     # Function to stream predictions
     def stream_predictions(predictions):
