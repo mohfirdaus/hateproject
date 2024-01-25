@@ -63,8 +63,8 @@ def scraper_detik(link_berita):
                 all_comments.extend(comments)
 
                 # Refresh iframe
-                driver.switch_to.default_content()
-                driver.switch_to.frame(iframe)
+                # driver.switch_to.default_content()
+                # driver.switch_to.frame(iframe)
                 logging.info("Successfully clicked 'more' button and retrieved comments.")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
