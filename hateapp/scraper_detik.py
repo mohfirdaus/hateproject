@@ -40,6 +40,7 @@ def scraper_detik(link_berita):
 
         while True:
             try:
+                print("masuk while True")
                 # tunggu hingga tombol "more" dapat diklik dan juga untuk menghindari error
                 wait = WebDriverWait(driver, 10) #
                 more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
@@ -52,6 +53,7 @@ def scraper_detik(link_berita):
                 
                 # komentar yg muncul di-assign ke variabel all_comments 
                 all_comments.extend(comments)
+                print(all_comments)
 
                 # refresh iframe
                 driver.switch_to.default_content()
