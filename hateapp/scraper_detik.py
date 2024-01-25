@@ -46,32 +46,32 @@ def scraper_detik(link_berita):
         # variabel untuk menyimpan komentar
         all_comments = []
 
-        # Find the div element with class "komentar-iframe-min-comment-entry"
-        div_element = driver.find_element_by_css_selector("div.komentar-iframe-min-comment-entry")
-
-        # Get the text content inside the div element
-        text_content = div_element.text
+        lebihbanyak = driver.find_element_by_css_selector("div.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16")
+        text_content = lebihbanyak.text
 
         # Print the text content
         print("*"*100)
         print(text_content)
         print("*"*100)
-
-        while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16'):
+        lanjut = True
+        # while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16')
+        while (lanjut == True):
             try:
                 logging.info("Trying to click 'more' button.")
                 print(logging.info)
                 
                 # Your existing code
                 wait = WebDriverWait(driver, 10)
-                more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
+                more_button = driver.find_element_by_css_selector('a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
+                lanjut = more_button.text=="Lihat lebih banyak"
+                print(lanjut)
                 driver.execute_script("arguments[0].click();", more_button)
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
                 all_comments.extend(comments)
 
                 # Refresh iframe
-                # driver.switch_to.default_content()
-                # driver.switch_to.frame(iframe)
+                driver.switch_to.default_content()
+                driver.switch_to.frame(iframe)
                 logging.info("Successfully clicked 'more' button and retrieved comments.")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
