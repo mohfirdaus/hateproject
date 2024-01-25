@@ -15,24 +15,21 @@ def scraper_detik(link_berita):
     chrome_options = Options()
     chrome_options.add_argument('--headless')  # jalankan browser tanpa GUI
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    #driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
-    driver.get("https://google.com/")
-    print(driver.title)
-#driver.quit()
+    driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options) options=chrome_options)
     try:
         # ambil judul berita
         soup_title = BeautifulSoup(requests.get(link_berita).text, "html.parser")
         title = soup_title.find("h1", class_='detail__title').text.strip()
-        print(title)
+
         # ambil konten berita
         content = ' '.join([p.get_text() for p in BeautifulSoup(urllib.request.urlopen(link_berita).read(), 'html.parser').find('div', class_='detail__body-text itp_bodycontent').find_all(lambda tag: isinstance(tag, Tag) and tag.name == 'p' and 'parallaxindetail scrollpage' not in tag.get('class', []), recursive=False)])
-        print(content)
+
         # buka url yg di-assign pada browser
         driver.get(link_berita)
 
         # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
         iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
-        print(iframe)
+
         driver.switch_to.frame(iframe)
 
         # variabel untuk menyimpan komentar

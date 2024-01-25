@@ -66,6 +66,7 @@ def berita(request):
                 
                 # Run the scraping function based on the news portal's domain
                 scraped_data = scraper_function(link_berita)
+                print(scraped_data)
 
                 if scraped_data and scraped_data['jumlah_komentar'] > 0:
                     # Input link, title, content, and number of comments into the Berita model
