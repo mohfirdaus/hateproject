@@ -29,7 +29,7 @@ def scraper_detik(link_berita):
         driver.get(link_berita)
         print("website dimuat dulu")
         time.sleep(15)
-        print("website telah melewati masa sleep")
+        print("website telah melewati masa")
         # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
         iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
         # print(iframe)
