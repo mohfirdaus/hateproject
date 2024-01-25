@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup, Tag
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
 import urllib.request
+import time
 
 def scraper_detik(link_berita):
     # Inisialisasi WebDriver lokal dengan Chrome
@@ -16,9 +17,6 @@ def scraper_detik(link_berita):
     chrome_options.add_argument('--headless')  # jalankan browser tanpa GUI
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     #driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
-    driver.get("https://google.com/")
-    print(driver.title)
-#driver.quit()
     try:
         # ambil judul berita
         soup_title = BeautifulSoup(requests.get(link_berita).text, "html.parser")
@@ -29,7 +27,9 @@ def scraper_detik(link_berita):
         print(content)
         # buka url yg di-assign pada browser
         driver.get(link_berita)
-
+        print("website dimuat dulu")
+        time.sleep(15)
+        print("website telah melewati masa sleep")
         # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
         iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
         # print(iframe)
