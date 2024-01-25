@@ -33,7 +33,7 @@ def scraper_detik(link_berita):
         # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
         iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
         # Ambil HTML dari elemen iframe
-        iframe_html = iframe.get_attribute('outerHTML')
+        iframe_html = iframe.get_attribute('innerHTML')
 
         # Parse HTML menggunakan BeautifulSoup
         soup = BeautifulSoup(iframe_html, 'html.parser')
