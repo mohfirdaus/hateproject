@@ -37,6 +37,7 @@ def scraper_detik(link_berita):
 
         # Parse HTML menggunakan BeautifulSoup
         soup = BeautifulSoup(iframe_html, 'html.parser')
+        print(soup)
 
         driver.switch_to.frame(iframe)
 
