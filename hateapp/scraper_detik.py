@@ -50,7 +50,7 @@ def scraper_detik(link_berita):
         print(text_content)
         print("*"*100)
 
-        while driver.find_elements_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline'):
+        while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16'):
             try:
                 logging.info("Trying to click 'more' button.")
                 print(logging.info)
