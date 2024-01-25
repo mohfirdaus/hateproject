@@ -10,6 +10,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import requests
 import urllib.request
 import time
+import logging
 
 def scraper_detik(link_berita):
     # Inisialisasi WebDriver lokal dengan Chrome
@@ -49,33 +50,26 @@ def scraper_detik(link_berita):
         print(text_content)
         print("*"*100)
 
-        while True:
+        while driver.find_elements_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline'):
             try:
-                print("masuk while True")
-                wait = WebDriverWait(driver, 10) #
+                logging.info("Trying to click 'more' button.")
+                print(logging.info)
+                
+                # Your existing code
+                wait = WebDriverWait(driver, 10)
                 more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
-
-                # klik button "more"
                 driver.execute_script("arguments[0].click();", more_button)
-                
-                # tunggu hingga komentar yang baru dimuat muncul
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
-                
-                # komentar yg muncul di-assign ke variabel all_comments 
                 all_comments.extend(comments)
-                # print(all_comments)
 
-                # refresh iframe
+                # Refresh iframe
                 driver.switch_to.default_content()
                 driver.switch_to.frame(iframe)
-                print("masih ada button")
+                logging.info("Successfully clicked 'more' button and retrieved comments.")
 
-            except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
-                # tombol "more" sudah tidak ada atau sudah berada dikomen paling bawah
-                break
-
-            if not driver.find_elements_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline'):
-                print("udah gada")
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+                logging.warning(f"Exception occurred: {e}")
+                # Handle exceptions as needed
                 break
 
         # Parsing HTML dengan BeautifulSoup
