@@ -73,7 +73,7 @@ def scraper_detik(link_berita):
                 driver.execute_script("arguments[0].scrollIntoView(); arguments[0].click();", more_button)
 
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
-                all_comments.extend(comments)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
 
                 # Refresh iframe if needed
                 # driver.switch_to.default_content()
