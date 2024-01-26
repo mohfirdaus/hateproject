@@ -44,7 +44,7 @@ def scraper_detik(link_berita):
 
         # variabel untuk menyimpan komentar
         all_comments = []
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 30)
 
         lebihbanyak = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
         text_content = lebihbanyak.text
@@ -53,7 +53,6 @@ def scraper_detik(link_berita):
         print("*"*100)
         print(text_content)
         print("*"*100)
-        lanjut = True
         # while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16')
         while True:
             try:
