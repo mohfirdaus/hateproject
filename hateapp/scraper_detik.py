@@ -15,15 +15,15 @@ import logging
 def scraper_detik(link_berita):
     # Inisialisasi WebDriver lokal dengan Chrome
     chrome_options = Options()
-    chrome_options.add_argument('--no-sandbox')
+    # chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument(
     "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--enable-javascript")
-    chrome_options.add_argument("--incognito")
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    #driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
+    # chrome_options.add_argument("--incognito")
+    # driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
     try:
         # ambil judul berita
         soup_title = BeautifulSoup(requests.get(link_berita).text, "html.parser")
@@ -75,6 +75,7 @@ def scraper_detik(link_berita):
                 logging.info("Successfully clicked 'more' button and retrieved comments.")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+                print(e)
                 logging.warning(f"Exception occurred: {e}")
                 # Handle exceptions as needed
                 break
