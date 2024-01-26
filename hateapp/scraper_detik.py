@@ -44,6 +44,9 @@ def scraper_detik(link_berita):
         # print(iframe)
         driver.switch_to.frame(iframe)
 
+        # Scroll down using JavaScript within the iframe
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
         # variabel untuk menyimpan komentar
         all_comments = []
         wait = WebDriverWait(driver, 20)
