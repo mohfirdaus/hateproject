@@ -74,6 +74,7 @@ def scraper_detik(link_berita):
 
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
+                print(soup)
 
                 # Refresh iframe if needed
                 # driver.switch_to.default_content()
