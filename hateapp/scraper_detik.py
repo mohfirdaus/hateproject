@@ -22,7 +22,6 @@ def scraper_detik(link_berita):
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--enable-javascript")
     chrome_options.add_argument("--incognito")
-    chrome_options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     #driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
     try:
@@ -45,8 +44,9 @@ def scraper_detik(link_berita):
 
         # variabel untuk menyimpan komentar
         all_comments = []
+        wait = WebDriverWait(driver, 10)
 
-        lebihbanyak = driver.find_element_by_css_selector("div.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16")
+        lebihbanyak = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
         text_content = lebihbanyak.text
 
         # Print the text content
@@ -55,23 +55,23 @@ def scraper_detik(link_berita):
         print("*"*100)
         lanjut = True
         # while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16')
-        while (lanjut == True):
+        while True:
             try:
                 logging.info("Trying to click 'more' button.")
                 print(logging.info)
                 
                 # Your existing code
                 wait = WebDriverWait(driver, 10)
-                more_button = driver.find_element_by_css_selector('a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
-                lanjut = more_button.text=="Lihat lebih banyak"
-                print(lanjut)
+                more_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
+                print("masih ada page")
+
                 driver.execute_script("arguments[0].click();", more_button)
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
                 all_comments.extend(comments)
 
                 # Refresh iframe
-                driver.switch_to.default_content()
-                driver.switch_to.frame(iframe)
+                # driver.switch_to.default_content()
+                # driver.switch_to.frame(iframe)
                 logging.info("Successfully clicked 'more' button and retrieved comments.")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
