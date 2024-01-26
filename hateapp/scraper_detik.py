@@ -46,7 +46,7 @@ def scraper_detik(link_berita):
         all_comments = []
         wait = WebDriverWait(driver, 30)
 
-        lebihbanyak = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
+        lebihbanyak = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
         text_content = lebihbanyak.text
 
         # Print the text content
@@ -61,7 +61,7 @@ def scraper_detik(link_berita):
                 
                 # Your existing code
                 wait = WebDriverWait(driver, 10)
-                more_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
+                more_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
                 print("masih ada page")
 
                 driver.execute_script("arguments[0].click();", more_button)
@@ -71,6 +71,7 @@ def scraper_detik(link_berita):
                 # Refresh iframe
                 # driver.switch_to.default_content()
                 # driver.switch_to.frame(iframe)
+                time.sleep(2)
                 logging.info("Successfully clicked 'more' button and retrieved comments.")
 
             except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
