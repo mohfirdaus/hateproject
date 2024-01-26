@@ -7,10 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from bs4 import BeautifulSoup, Tag
 from webdriver_manager.chrome import ChromeDriverManager
-import requests
-import urllib.request
-import time
-import logging
+import logging, traceback, time, urllib.request, requests
 
 def scraper_detik(link_berita):
     # Inisialisasi WebDriver lokal dengan Chrome
@@ -22,8 +19,8 @@ def scraper_detik(link_berita):
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_argument("--enable-javascript")
     # chrome_options.add_argument("--incognito")
-    # driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
-    driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # driver = webdriver.Chrome("/usr/bin/chromedriver", options=chrome_options)
     try:
         # ambil judul berita
         soup_title = BeautifulSoup(requests.get(link_berita).text, "html.parser")
@@ -44,7 +41,7 @@ def scraper_detik(link_berita):
 
         # variabel untuk menyimpan komentar
         all_comments = []
-        wait = WebDriverWait(driver, 30)
+        wait = WebDriverWait(driver, 20)
 
         lebihbanyak = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
         text_content = lebihbanyak.text
@@ -54,31 +51,39 @@ def scraper_detik(link_berita):
         print(text_content)
         print("*"*100)
         # while driver.find_elements_by_css_selector('.komentar-iframe-min-text-center.komentar-iframe-min-mgt-16')
+
+        # Create WebDriverWait instance outside the loop
+        wait = WebDriverWait(driver, 20)
+
         while True:
             try:
-                logging.info("Trying to click 'more' button.")
-                print(logging.info)
+                print("Trying to find 'more' button.")
+                
+                # Check if the 'more' button exists
+                more_button = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
+                
+                print("'More' button found. Clicking it.")
                 
                 # Your existing code
-                wait = WebDriverWait(driver, 10)
-                more_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'a.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
-                print("masih ada page")
+                driver.execute_script("arguments[0].scrollIntoView(); arguments[0].click();", more_button)
 
-                driver.execute_script("arguments[0].click();", more_button)
                 comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
                 all_comments.extend(comments)
 
-                # Refresh iframe
+                # Refresh iframe if needed
                 # driver.switch_to.default_content()
                 # driver.switch_to.frame(iframe)
                 time.sleep(2)
-                logging.info("Successfully clicked 'more' button and retrieved comments.")
+                
+                print("Successfully clicked 'more' button and retrieved comments.")
+                
+            except Exception as e:
+                traceback.print_exc()
+                print(f"Exception occurred: {e}. Retrying...")
+                break  # Continue to the next iteration of the loop
 
-            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
-                print(e)
-                logging.warning(f"Exception occurred: {e}")
-                # Handle exceptions as needed
-                break
+            # Break out of the loop if no exception occurs
+        StopIteration()
 
         # Parsing HTML dengan BeautifulSoup
         soup = BeautifulSoup(driver.page_source, 'html.parser')
