@@ -6,8 +6,11 @@ from .models import Komentar
 import numpy as np
 import requests
 
+model_path = "model"
+tokenizer_path = "tokenizer"
+
 API_URL = "https://api-inference.huggingface.co/models/sidaus/hatespeech-commentnews-large-ind-2"
-headers = {"Authorization": "Bearer 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"}
+headers = {"Authorization": "Bearer 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"}
 
 # Function to remove emojis from a text
 def remove_emojis(text):
@@ -54,7 +57,11 @@ def cleansing(text):
     return text
 
 def send_query_with_wait_for_model(payload):
-    return requests.post(API_URL, headers=headers, json={"inputs": payload, "options": {"wait_for_model": True}}).json()
+    try:
+        return requests.post(API_URL, headers=headers, json={"inputs": payload, "options": {"wait_for_model": True}}).json()
+    except Exception as e:
+        if "Rate limit reached" in str(e.args[0]):
+            print("eh miskin")
 
 def prediction(request, berita_id):
     komentar_list = Komentar.objects.filter(berita__id=berita_id)

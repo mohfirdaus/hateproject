@@ -57,7 +57,7 @@
                 <th>Komentar</th>
                 <th>Prediksi</th>
                 <th>Probabilitas</th>
-                <th>Action</th>
+                <!-- <th>Action</th> -->
             </tr>
         </thead>
     <tbody>
@@ -75,7 +75,7 @@
                     {% endif %}
                 </td>
                 <td class="text-center">{{ komentar_instance.formatted_probabilitas }}</td>
-                {% if komentar_instance.prediksi != None %}
+                <!-- {% if komentar_instance.prediksi != None %}
                 <td class="text-center">
                     {% if komentar_instance.prediksi and not komentar_instance.edit_prediksi.exists %}
                         <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#editPrediksiModal{{ komentar_instance.id }}">
@@ -87,7 +87,7 @@
                         <p>Koreksi Label Sedang Tinjau Admin</p>
                     {% endif %}
                 </td>
-                {% endif %}
+                {% endif %} -->
             </tr>
 
             {% if komentar_instance.prediksi %}
