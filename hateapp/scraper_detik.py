@@ -108,9 +108,10 @@ def scraper_detik(link_berita):
         # Parsing HTML dengan BeautifulSoup
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        # Temukan elemen-elemen tag komentar dan username
+        # Temukan elemen-elemen tag komentar, username, dan tanggal
         comment_elements = soup.select('.komentar-iframe-min-media__desc') 
         user_elements = soup.select('.komentar-iframe-min-media__user')
+        date_elements = soup.select('.komentar-iframe-min-media__date')
 
         # Simpan data ke dalam dictionary data
         data = {
@@ -125,8 +126,14 @@ def scraper_detik(link_berita):
         komentar_set = set()
 
         # Loop untuk assign komentar ke dalam dictionary
-        for user, comment in zip(user_elements, comment_elements):
+        for user, comment, date in zip(user_elements, comment_elements, date_elements):
             comment_text = comment.text.strip()
+            date_text = date.text.strip()
+
+            # Abaikan komentar yang tanggalnya "Promoted"
+            if date_text == "Promoted":
+                continue
+
             if comment_text not in komentar_set:
                 data['komentar'].append({
                     'username': user.text.strip(),
