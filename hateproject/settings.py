@@ -29,9 +29,9 @@ SECRET_KEY = 'django-insecure-h2!3vc8z&-m0$4egze^2d4(_$8!(a^#q+i@=j@6y3ynn0b7_8g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['167.71.209.87','localhost',"*"]
+ALLOWED_HOSTS = ['167.71.209.87','localhost',"*", 'bijaka.xyz']
 
-CSRF_TRUSTED_ORIGINS = ['http://167.71.209.87']
+CSRF_TRUSTED_ORIGINS = ['http://167.71.209.87','http://bijaka.xyz']
 
 # DATA_UPLOAD_MAX_HEADER_SIZE = 1024 * 1024 * 1000 * 5  # 2 GB in bytes
 
