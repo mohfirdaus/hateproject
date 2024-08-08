@@ -44,17 +44,3 @@ class Komentar(models.Model):
             return "Non-Hate"
         else:
             return "Hate"
-
-class EditPrediksi(models.Model):
-    komentar = models.ForeignKey('Komentar', on_delete=models.CASCADE, related_name='edit_prediksi')
-    nama = models.CharField(max_length=255)
-    email = models.EmailField()
-    prediksi_saat_ini = models.CharField(max_length=10)
-    prediksi_seharusnya = models.CharField(max_length=10)
-    alasan = models.TextField()
-    remarks = models.TextField(blank=True, null=True)
-    sudahditinjau = models.BooleanField(default=False, null=True)
-    statusadmin = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f'Edit Prediksi untuk Komentar oleh {self.nama}'

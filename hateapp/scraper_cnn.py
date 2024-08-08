@@ -8,13 +8,24 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 from bs4 import BeautifulSoup, Tag
 from webdriver_manager.chrome import ChromeDriverManager
 import requests
-import urllib.request
+import time 
 
 def scraper_cnn(link_berita):
-    # Inisialisasi WebDriver lokal dengan Chrome
     chrome_options = Options()
-    chrome_options.add_argument('--headless')  # jalankan browser tanpa GUI
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    chrome_options = Options()
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--headless')  # Run in headless mode
+    # Menonaktifkan JavaScript di seluruh halaman
+    chrome_options.add_argument('--disable-javascript')
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    chrome_options.add_argument("--disable-gpu")
+    # chrome_options.binary_location = "/usr/bin/google-chrome"  # Sesuaikan path dengan lokasi Chrome di sistem Anda
+
+    print("ini masuk di def cnn")
+    # Initialize the driver with the service and options
+    driver = webdriver.Chrome(options=chrome_options)
+    print("haiiiii")
 
     try:
         # ambil judul berita
@@ -26,37 +37,71 @@ def scraper_cnn(link_berita):
 
         # buka url yg di-assign pada browser
         driver.get(link_berita)
+        
+        driver.execute_script("""
+            var elements = document.querySelectorAll('body *:not(iframe)');
+            elements.forEach(function(el) {
+                el.style.display = 'none';
+            });
+        """)
 
-        # iframe dengan atribut title="comment_component" yg dimana terdapat komentar
-        iframe = driver.find_element_by_css_selector('iframe[title="comment_component"]')
-
+        # Tunggu hingga iframe tersedia dan pindah ke iframe
+        iframe = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="comment_component"]'))
+        )
         driver.switch_to.frame(iframe)
 
-        # variabel untuk menyimpan komentar
+        # Variabel untuk menyimpan komentar
         all_comments = []
 
+        # Tunggu beberapa detik untuk memastikan elemen ter-load
+        time.sleep(2)
+
+        # Klik semua tombol "more" hingga tidak ada lagi
         while True:
             try:
-                # tunggu hingga tombol "more" dapat diklik dan juga untuk menghindari error
-                wait = WebDriverWait(driver, 10) #
-                more_button = driver.find_element_by_css_selector('.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')
+                # Tunggu hingga tombol "more" dapat diklik
+                wait = WebDriverWait(driver, 10)
+                more_buttons = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-btn.komentar-iframe-min-btn--outline')))
+                if not more_buttons:
+                    print("Tidak ada tombol 'more' ditemukan. Mengakhiri pencarian.")
+                    break
 
-                # klik button "more"
-                driver.execute_script("arguments[0].click();", more_button)
-                
-                # tunggu hingga komentar yang baru dimuat muncul
-                comments = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')))
-                
-                # komentar yg muncul di-assign ke variabel all_comments 
-                all_comments.extend(comments)
+                for more_button in more_buttons:
+                    driver.execute_script("arguments[0].click();", more_button)
+                    print("Tombol 'more' diklik.")
+                    # Tunggu beberapa saat untuk memastikan tombol sudah diklik dan konten diperbarui
+                    time.sleep(2)
 
-                # refresh iframe
-                driver.switch_to.default_content()
-                driver.switch_to.frame(iframe)
-
-            except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
-                # tombol "more" sudah tidak ada atau sudah berada dikomen paling bawah
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+                print(f"Kesalahan saat mengklik tombol 'more': {e}")
                 break
+
+        # Klik semua tombol "reply" hingga tidak ada lagi
+        while True:
+            try:
+                reply_buttons = driver.find_elements(By.CSS_SELECTOR, '.komentar-iframe-min-comment-link')
+                all_replies_hidden = True
+                for reply_button in reply_buttons:
+                    span_text = reply_button.find_element(By.CSS_SELECTOR, 'span').text
+                    if "Sembunyikan" not in span_text:
+                        driver.execute_script("arguments[0].click();", reply_button)
+                        print(f"Tombol 'lihat reply' diklik. ({span_text})")
+                        all_replies_hidden = False
+                        time.sleep(2)
+
+                if all_replies_hidden:
+                    print("Semua tombol 'lihat reply' telah berubah menjadi 'Sembunyikan X balasan'.")
+                    break
+
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException) as e:
+                print(f"Kesalahan saat mengklik tombol 'reply': {e}")
+                break
+
+        # Ambil semua komentar yang ada
+        comments = driver.find_elements(By.CSS_SELECTOR, '.komentar-iframe-min-media__desc')
+        for comment in comments:
+            all_comments.append(comment.text)
 
         # Parsing HTML dengan BeautifulSoup
         soup = BeautifulSoup(driver.page_source, 'html.parser')

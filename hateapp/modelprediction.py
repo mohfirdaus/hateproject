@@ -1,6 +1,4 @@
 import re
-from transformers import BertTokenizer, BertForSequenceClassification
-import torch
 from django.shortcuts import render
 from .models import Komentar
 import numpy as np

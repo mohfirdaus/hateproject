@@ -14,7 +14,9 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +29,7 @@ SECRET_KEY = 'django-insecure-h2!3vc8z&-m0$4egze^2d4(_$8!(a^#q+i@=j@6y3ynn0b7_8g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['20.163.237.39','localhost',"*"]
+ALLOWED_HOSTS = ['159.89.211.162','localhost',"*"]
 
 DATA_UPLOAD_MAX_HEADER_SIZE = 1024 * 1024 * 1000 * 5  # 2 GB in bytes
 
@@ -62,7 +64,7 @@ ROOT_URLCONF = 'hateproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,7 +90,8 @@ WSGI_APPLICATION = 'hateproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        # 'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME' : os.path.join(BASE_DIR, 'db.sqlite3')
     }
 }
 
