@@ -31,7 +31,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['167.71.209.87','localhost',"*", 'bijaka.xyz']
 
-CSRF_TRUSTED_ORIGINS = ['http://167.71.209.87','http://bijaka.xyz']
+CSRF_TRUSTED_ORIGINS = ['http://167.71.209.87','http://bijaka.xyz', 'bijaka.xyz', 'www.bijaka.xyz','https://bijaka.xyz']
 
 # DATA_UPLOAD_MAX_HEADER_SIZE = 1024 * 1024 * 1000 * 5  # 2 GB in bytes
 
