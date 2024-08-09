@@ -16,47 +16,67 @@
         <div class="card-body">
             <h2 class="card-title">{{ hasil_scrape.judul }}</h2>
             <p class="card-text text-justify">{{ hasil_scrape.konten }}</p>
-            <p class="card-text"><small class="text-muted">Sumber: <a href="{{hasil_scrape.link}}" target="_blank">{{ hasil_scrape.portal }}</a></small></p>
+            <p class="card-text"><small class="text-muted">Sumber: <a href="{{hasil_scrape.link}}" target="_blank">{{hasil_scrape.link}}</a></small></p>
         </div>
     </div>
-    <div class="row">
+    <div class="row align-items-center mb-4">
         <div class="col-12 col-md-6">
-            <h3 class="mb-4">Komentar: </h3>
-            <h5 style="opacity: 75%; margin-top: 0.29em;"><strong>({{ hasil_scrape.jumlah_komentar }} Komentar)</strong></h5>
+            <h3>Komentar: </h3>
+            <h5 class="comment-count"><strong>({{ hasil_scrape.jumlah_komentar }} Komentar)</strong></h5>
         </div>
     
         {% if filtered_komentar|length == komentar|length %}
             <div class="col-12 col-md-6 d-flex justify-content-md-end">
-                <form id="predict-form" method="post" action="{% url 'predict_comments' berita_id=hasil_scrape.id %}" style="display: inline;">
+                <form id="predict-form" method="post" action="{% url 'predict_comments' berita_id=hasil_scrape.id %}" class="d-inline">
                     {% csrf_token %}
-                    <button id="predict-button" type="submit" class="btn mx-2" style="border-radius: 20px; background-color: #005EA2; color: white;">
+                    <button id="predict-button" type="submit" class="btn predict-btn mx-2">
                         <span id="button-text"><strong>Prediksi Komentar</strong></span>
-                        <span id="loading-spinner" style="display: none;">Sedang menganalisis komentar...</span>
+                        <span id="loading-spinner" class="spinner" style="display: none;">Sedang menganalisis komentar...</span>
                     </button>
                 </form>
             </div>
         {% else %}
-        <div class="col-12 col-md-6 d-flex justify-content-md-end">
-            <div class="d-flex flex-wrap">
-                <div class="d-flex align-items-center justify-content-center mx-1 mb-2" style="width: 100px; height: 35px; border-radius: 20px; border: 3px solid #dc3545; font-size: 14px; font-weight: bold; color: #dc3545;">
-                    Hate: {{ hate_count }}
-                </div>
-                <div class="d-flex align-items-center justify-content-center mx-1 mb-2" style="width: 120px; height: 35px; border-radius: 20px; border: 3px solid #007bff; font-size: 14px; font-weight: bold; color: #007bff;">
-                    Non-hate: {{ non_hate_count }}
+            <div class="col-12 col-md-6 d-flex justify-content-md-end">
+                <div class="d-flex flex-wrap justify-content-center align-items-center">
+                    <div class="stat-box hate-count mx-1 mb-2">
+                        Hate: {{ hate_count }}
+                    </div>
+                    <div class="stat-box non-hate-count mx-1 mb-2">
+                        Non-hate: {{ non_hate_count }}
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
-    </div>
+    </div>    
     <div class="table-responsive">
         <table class="table table-bordered">
             <thead class="text-center">
                 <tr>
-                    <th>Username</th>
+                    <th>
+                        <a style="color: black;" href="?sort=username&order={% if current_sort == 'username' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}">
+                            Username 
+                            {% if current_sort == 'username' %}
+                                <span class="sort-icon">{% if current_order == 'asc' %}&uarr;{% else %}&darr;{% endif %}</span>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th>Komentar</th>
-                    <th>Prediksi</th>
-                    <th>Probabilitas</th>
-                    <!-- <th>Action</th> -->
+                    <th>
+                        <a  style="color: black;" href="?sort=prediksi&order={% if current_sort == 'prediksi' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}">
+                            Prediksi 
+                            {% if current_sort == 'prediksi' %}
+                                <span class="sort-icon">{% if current_order == 'asc' %}&uarr;{% else %}&darr;{% endif %}</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a  style="color: black;" href="?sort=probabilitas&order={% if current_sort == 'probabilitas' and current_order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.page %}&page={{ request.GET.page }}{% endif %}">
+                            Probabilitas 
+                            {% if current_sort == 'probabilitas' %}
+                                <span class="sort-icon">{% if current_order == 'asc' %}&uarr;{% else %}&darr;{% endif %}</span>
+                            {% endif %}
+                        </a>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -74,36 +94,7 @@
                             {% endif %}
                         </td>
                         <td data-label="Probabilitas" class="text-center">{{ komentar_instance.formatted_probabilitas }}</td>
-                        <!-- {% if komentar_instance.prediksi != None %}
-                        <td class="text-center">
-                            {% if komentar_instance.prediksi and not komentar_instance.edit_prediksi.exists %}
-                                <button type="button" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#editPrediksiModal{{ komentar_instance.id }}">
-                                    Koreksi Label
-                                </button>
-                            {% elif komentar_instance.edit_prediksi.exists and komentar_instance.edit_prediksi.last.sudahditinjau %}
-                                <p>Sudah pernah dikoreksi label</p>
-                            {% else %}
-                                <p>Koreksi Label Sedang Tinjau Admin</p>
-                            {% endif %}
-                        </td>
-                        {% endif %} -->
                     </tr>
-
-                    {% if komentar_instance.prediksi %}
-                        <!-- Modal -->
-                        <div class="modal fade" id="editPrediksiModal{{ komentar_instance.id }}" tabindex="-1" role="dialog" aria-labelledby="editPrediksiModalLabel{{ komentar_instance.id }}" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="editPrediksiModalLabel{{ komentar_instance.id }}">Koreksi Label</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>
@@ -113,12 +104,12 @@
         <ul class="pagination justify-content-center">
             {% if komentar.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1" aria-label="First">
+                    <a class="page-link" href="?page=1{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}" aria-label="First">
                         <span aria-hidden="true">&laquo;&laquo;</span>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ komentar.previous_page_number }}" aria-label="Previous">
+                    <a class="page-link" href="?page={{ komentar.previous_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}" aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
@@ -132,12 +123,12 @@
 
             {% if komentar.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ komentar.next_page_number }}" aria-label="Next">
+                    <a class="page-link" href="?page={{ komentar.next_page_number }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}" aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ komentar.paginator.num_pages }}" aria-label="Last">
+                    <a class="page-link" href="?page={{ komentar.paginator.num_pages }}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}{% if request.GET.order %}&order={{ request.GET.order }}{% endif %}" aria-label="Last">
                         <span aria-hidden="true">&raquo;&raquo;</span>
                     </a>
                 </li>
@@ -151,6 +142,7 @@
         </div>
     {% endif %}
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('predict-form');
@@ -212,6 +204,76 @@ document.addEventListener('DOMContentLoaded', function () {
         text-align: left;
     }
 }
+a {
+    display: inline-flex;
+    align-items: center; /* Menyelaraskan teks dan ikon secara vertikal */
+    white-space: nowrap; /* Mencegah teks dan ikon terpisah ke baris lain */
+}
+
+.sort-icon {
+    font-size: 0.8em;
+    margin-left: 2px;
+}
+/* Styling untuk komentar */
+.comment-count {
+    opacity: 0.75;
+    margin-top: 0.2em;
+}
+
+/* Styling untuk tombol */
+.predict-btn {
+    border-radius: 20px;
+    background-color: #005EA2;
+    color: white;
+    padding: 0.5em 1.5em;
+    font-size: 1em;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.predict-btn:hover, .predict-btn:focus {
+    background-color: #004080;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    outline: none;
+    color: #f0f0f0; /* Warna teks yang lebih lembut saat hover */
+}
+
+/* Styling untuk spinner */
+.spinner {
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+/* Styling untuk kotak statistik */
+.stat-box {
+    height: 35px;
+    border-radius: 20px;
+    border: 3px solid;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0.2em 1em;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.hate-count {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.non-hate-count {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+/* Efek hover yang lebih lembut dan elegan */
+.stat-box:hover, .stat-box:focus {
+    background-color: rgba(0, 0, 0, 0.05); /* Sedikit perubahan pada background */
+    color: inherit; /* Warna teks tetap sesuai dengan kotak aslinya */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
 </style>
 
 {% endblock %}

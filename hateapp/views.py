@@ -13,6 +13,12 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import StreamingHttpResponse
+from django.shortcuts import render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Case, When, Value, IntegerField, F
+from .models import Berita, Komentar
+from django.db.models.functions import Lower
+
 
 
 logger = logging.getLogger(__name__)
@@ -108,14 +114,36 @@ def berita(request):
     # request.stop_prediction = True
     return render(request, 'home.html', {'berita_list': berita_list, 'form': form, 'stop_prediction': True})
 
-
-def detail_berita(request, berita_id,):
+def detail_berita(request, berita_id):
     try:
         hasil_scrape = Berita.objects.get(id=berita_id)
         komentar_list = Komentar.objects.filter(berita=hasil_scrape)
     except Berita.DoesNotExist:
         hasil_scrape = None
         komentar_list = None
+
+    # Sorting
+    sort_by = request.GET.get('sort', 'default')
+    sort_order = request.GET.get('order', 'asc')
+    
+    if sort_by == 'username':
+        komentar_list = komentar_list.order_by(Lower('penulis_komentar').asc() if sort_order == 'asc' else Lower('penulis_komentar').desc())
+    elif sort_by == 'prediksi':
+        komentar_list = komentar_list.order_by(
+            Case(
+                When(prediksi='Hate', then=Value(1)),
+                When(prediksi='Non-Hate', then=Value(2)),
+                default=Value(3),
+                output_field=IntegerField(),
+            ).asc() if sort_order == 'asc' else Case(
+                When(prediksi='Hate', then=Value(1)),
+                When(prediksi='Non-Hate', then=Value(2)),
+                default=Value(3),
+                output_field=IntegerField(),
+            ).desc()
+        )
+    elif sort_by == 'probabilitas':
+        komentar_list = komentar_list.order_by(F('probabilitas').asc(nulls_last=True) if sort_order == 'asc' else F('probabilitas').desc(nulls_last=True))
 
     # Calculate counts
     hate_count = komentar_list.filter(prediksi='Hate').count()
@@ -124,17 +152,24 @@ def detail_berita(request, berita_id,):
     # Pagination
     paginator = Paginator(komentar_list, 10)  
     page = request.GET.get('page')
-
     try:
         komentar = paginator.page(page)
     except PageNotAnInteger:
         komentar = paginator.page(1)
     except EmptyPage:
         komentar = paginator.page(paginator.num_pages)
-    
+   
     filtered_komentar = [k for k in komentar if k.prediksi is None]
-
-    return render(request, 'detail_berita.html', {'hasil_scrape': hasil_scrape, 'komentar': komentar, 'filtered_komentar': filtered_komentar, 'hate_count':hate_count, 'non_hate_count':non_hate_count})
+    
+    return render(request, 'detail_berita.html', {
+        'hasil_scrape': hasil_scrape, 
+        'komentar': komentar, 
+        'filtered_komentar': filtered_komentar, 
+        'hate_count': hate_count, 
+        'non_hate_count': non_hate_count,
+        'current_sort': sort_by,
+        'current_order': sort_order
+    })
 
 def list_berita(request):
     form = BeritaSearchForm(request.GET)

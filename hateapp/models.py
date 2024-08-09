@@ -1,8 +1,12 @@
+import uuid
 from django.db import models
 
-# Create your models here.
+def generate_short_uuid():
+    return str(uuid.uuid4())[:8]
+
 class Berita(models.Model):
-    link = models.URLField() 
+    id = models.CharField(primary_key=True, max_length=8, default=generate_short_uuid, editable=False, unique=True)
+    link = models.URLField()
     portal = models.CharField(max_length=50)
     judul = models.CharField(max_length=255)
     konten = models.TextField()
@@ -12,11 +16,12 @@ class Berita(models.Model):
     @property
     def status_prediksi(self):
         return all(komentar.prediksi is not None for komentar in self.komentar_set.all())
-    
+
     def __str__(self):
         return self.judul
 
 class Komentar(models.Model):
+    id = models.CharField(primary_key=True, max_length=8, default=generate_short_uuid, editable=False, unique=True)
     berita = models.ForeignKey(Berita, on_delete=models.CASCADE, related_name='komentar_set')
     penulis_komentar = models.CharField(max_length=255)
     isi_komentar = models.TextField()
@@ -37,7 +42,7 @@ class Komentar(models.Model):
             return "{:.4%}".format(self.probabilitas)
         else:
             return "N/A"
-    
+
     @property
     def prediksi_seharusnya(self):
         if self.prediksi == "Hate":
